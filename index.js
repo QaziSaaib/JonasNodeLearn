@@ -1,0 +1,124 @@
+const fs_obj = require("fs");
+const http = require("http");
+const url = require("url");
+
+// console.log(fs_obj);
+
+console.log("Hello folks");
+// console.log("File reading started...");
+
+///////////////////////////////////////////////////////////////////////////////////
+// In a synchronous Way of Reading and Writing files
+// const textIn = fs_obj.readFileSync(`./txt/input.txt`, "utf-8");
+// console.log(textIn);
+
+// console.log("Other tasks...");
+
+// const textOut = `This is what we know about the avocado ${textIn}.\n Created on ${new Date(
+//   "10-11-2030"
+// )}`;
+// fs_obj.writeFileSync(`./txt/output.txt`, textOut);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Asynchronous File reading and writing
+
+// fs_obj.readFile("./txt/start.txt", "utf-8", (err, data1) => {
+//   if (err) {
+//     console.log(`❌ ${err}`);
+//     return;
+//   }
+//   fs_obj.readFile(`./txt/${data1}.txt`, "utf-8", (err, data2) => {
+//     fs_obj.readFile(`./txt/append.txt`, "utf-8", (err, data3) => {
+//       fs_obj.writeFile(
+//         "./txt/final.txt",
+//         `${data2}\n${data3}`,
+//         "utf-8",
+//         (err) => {
+//           if (err) {
+//             console.log(`Writing to the fail failed...❌`);
+//           }
+//         }
+//       );
+//     });
+//   });
+// });
+// console.log("File reading started...");
+
+///////////////////////////////////////////////////////////////////////////////////
+// Using http module to create our local machine as a simple SERVER...
+
+// const server = http.createServer((req, res) => {
+//   res.end("Hello from the server");
+// });
+
+// server.listen(5000, "127.0.0.1", () => {
+//   console.log("Our server is listening from the port 5000");
+// });
+
+// Routing
+// const server = http.createServer((req, res) => {
+//   const pathName = req.url;
+
+//   if (pathName === "/" || pathName === "/overview") {
+//     res.end("This is the Home Page");
+//   } else if (pathName === "/products") {
+//     res.end("This is the products page");
+//   } else {
+//     res.writeHead(404, {
+//       "Content-type": "text/html",
+//       "my-own-header": "hello world",
+//     });
+//     res.end("<h1>Page not available...Sorry</h1>");
+//   }
+// });
+
+// server.listen(5000, "127.0.0.1", () => {
+//   console.log("Our server is listening from the port 5000");
+// });
+
+///////////////////////////////////////////////////////////////////////////////////
+// Building a simple API
+
+// const server = http.createServer((req, res) => {
+//   console.log(
+//     "Executing this callback function, when request is send to our server"
+//   );
+//   res.end("Response from the server");
+// });
+
+// server.listen(5000, "127.0.0.1", () => {
+//   console.log("Listening to the request (Local Host) from the port 5000");
+// });
+
+const data = fs_obj.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
+const dataObj = JSON.parse(data);
+// console.log(dataObj);
+
+const server = http.createServer((req, res) => {
+  const pathName = req.url;
+  if (pathName === "/" || pathName === "/home") {
+    res.end("Home page of the website");
+  } else if (pathName === "/products") {
+    res.end("Products page of the website");
+  } else if (pathName === "/api") {
+    // fs_obj.readFile(`./dev-data/data.json`, "utf-8", (err, result) => {
+    //   const data = JSON.parse(result);
+    //   console.log(data);
+    // });
+    // res.end("API");
+    res.writeHead(200, {
+      "Content-type": "application/json",
+    });
+    res.end(data);
+  } else {
+    res.writeHead(404, {
+      "Content-Type": "text/html",
+      "my-own-header": "hello world",
+    });
+    res.end("<h1>Page not found...404 error</h1>");
+  }
+});
+
+server.listen(5000, "127.0.0.1", () => {
+  console.log("Listening to the request (Local Host) from the port 5000");
+});
