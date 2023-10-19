@@ -2,6 +2,8 @@ const fs_obj = require("fs");
 const http = require("http");
 const url = require("url");
 
+const { replaceTemplate } = require("./modules/mod1");
+
 // console.log(fs_obj);
 
 // console.log("Hello folks");
@@ -143,23 +145,6 @@ const template_overview = fs_obj.readFileSync(
   `${__dirname}/templates/template-overview.html`,
   "utf-8"
 );
-
-const replaceTemplate = function (product, template) {
-  let output = template
-    .replaceAll(`{%IMAGE%}`, product.image)
-    .replaceAll(`{%PRODUCTNAME%}`, product.productName)
-    .replaceAll(`{%PRICE%}`, product.price)
-    .replaceAll(`{%QUANTITY%}`, product.quantity)
-    .replaceAll(`{%ID%}`, product.id)
-    .replaceAll(`{%DESCRIPTION%}`, product.description)
-    .replaceAll(`{%NUTRIENTS%}`, product.nutrients)
-    .replaceAll(`{%FROM%}`, product.from);
-
-  if (!product.organic)
-    output = output.replaceAll(`{%NOT_ORGANIC%}`, "not-organic");
-
-  return output;
-};
 
 const server = http.createServer((req, res) => {
   const { pathname, query } = url.parse(req.url, true);
