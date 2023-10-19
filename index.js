@@ -4,7 +4,7 @@ const url = require("url");
 
 // console.log(fs_obj);
 
-console.log("Hello folks");
+// console.log("Hello folks");
 // console.log("File reading started...");
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -90,35 +90,105 @@ console.log("Hello folks");
 //   console.log("Listening to the request (Local Host) from the port 5000");
 // });
 
-const data = fs_obj.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
-const dataObj = JSON.parse(data);
-// console.log(dataObj);
+// const data = fs_obj.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
+// const dataObj = JSON.parse(data);
+// // console.log(dataObj);
+
+// const server = http.createServer((req, res) => {
+//   const pathName = req.url;
+//   if (pathName === "/" || pathName === "/home") {
+//     res.end("Home page of the website");
+//   } else if (pathName === "/products") {
+//     res.end("Products page of the website");
+//   } else if (pathName === "/api") {
+//     // fs_obj.readFile(`./dev-data/data.json`, "utf-8", (err, result) => {
+//     //   const data = JSON.parse(result);
+//     //   console.log(data);
+//     // });
+//     // res.end("API");
+//     res.writeHead(200, {
+//       "Content-type": "application/json",
+//     });
+//     res.end(data);
+//   } else {
+//     res.writeHead(404, {
+//       "Content-Type": "text/html",
+//       "my-own-header": "hello world",
+//     });
+//     res.end("<h1>Page not found...404 error</h1>");
+//   }
+// });
+
+// server.listen(5000, "127.0.0.1", () => {
+//   console.log("Listening to the request (Local Host) from the port 5000");
+// });
+
+///////////////////////////////////////////////////////////////////////////////////
+// HTML Templating
+
+const dataJson = fs_obj.readFileSync(`${__dirname}/dev-data/data.json`);
+const data = JSON.parse(dataJson);
+
+// console.log(data);
+
+const template_card = fs_obj.readFileSync(
+  `${__dirname}/templates/template-card.html`,
+  "utf-8"
+);
+const template_product = fs_obj.readFileSync(
+  `${__dirname}/templates/template-product.html`,
+  "utf-8"
+);
+const template_overview = fs_obj.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  "utf-8"
+);
+
+const replaceTemplate = function (product, template) {
+  let output = template
+    .replaceAll(`{%IMAGE%}`, product.image)
+    .replaceAll(`{%PRODUCTNAME%}`, product.productName)
+    .replaceAll(`{%PRICE%}`, product.price)
+    .replaceAll(`{%QUANTITY%}`, product.quantity)
+    .replaceAll(`{%ID%}`, product.id)
+    .replaceAll(`{%DESCRIPTION%}`, product.description)
+    .replaceAll(`{%NUTRIENTS%}`, product.nutrients)
+    .replaceAll(`{%FROM%}`, product.from);
+
+  if (!product.organic)
+    output = output.replaceAll(`{%NOT_ORGANIC%}`, "not-organic");
+
+  return output;
+};
 
 const server = http.createServer((req, res) => {
-  const pathName = req.url;
-  if (pathName === "/" || pathName === "/home") {
-    res.end("Home page of the website");
-  } else if (pathName === "/products") {
-    res.end("Products page of the website");
-  } else if (pathName === "/api") {
-    // fs_obj.readFile(`./dev-data/data.json`, "utf-8", (err, result) => {
-    //   const data = JSON.parse(result);
-    //   console.log(data);
-    // });
-    // res.end("API");
+  const { pathname, query } = url.parse(req.url, true);
+  if (pathname === "/" || pathname === "/overview") {
+    const cards = data
+      .map((product) => replaceTemplate(product, template_card))
+      .join(" ");
+    const overview = template_overview.replaceAll(`{%PRODUCT_CARDS%}`, cards);
     res.writeHead(200, {
-      "Content-type": "application/json",
+      "Content-type": "text/html",
     });
-    res.end(data);
+    res.end(overview);
+  } else if (pathname === "/product") {
+    const product = data[query.id];
+    const product_template = replaceTemplate(product, template_product);
+    res.writeHead(200, {
+      "Content-type": "text/html",
+    });
+    res.end(product_template);
+  } else if (pathname === "/api") {
+    res.end("API");
   } else {
     res.writeHead(404, {
-      "Content-Type": "text/html",
-      "my-own-header": "hello world",
+      "Content-type": "text/html",
     });
-    res.end("<h1>Page not found...404 error</h1>");
+    res.end("<h2>Sorry page is not found!</h2>");
   }
 });
 
 server.listen(5000, "127.0.0.1", () => {
-  console.log("Listening to the request (Local Host) from the port 5000");
+  console.log("Listening to request from the port 5000");
 });
